@@ -34,9 +34,17 @@ app.all("*", (req, res) => {
 // handle global error
 app.use(globalErrorHandler);
 
+if (!DB_HOST) {
+  console.error('Error: DB_HOST environment variable is not set.');
+  process.exit(1);
+}
+
 //SERVER
 mongoose
-  .connect(DB_HOST)
+  .connect(DB_HOST, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
