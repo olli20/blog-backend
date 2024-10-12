@@ -41,17 +41,14 @@ if (!DB_HOST) {
 
 //SERVER
 mongoose
-  .connect(DB_HOST, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+  .connect(DB_HOST)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log("Database connection successful");
     });
-})
+  })
   .catch((error) => {
-    console.log(error.message);
+    console.error('MongoDB connection error:', error.message);
     process.exit(1);
-});
+  });
