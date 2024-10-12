@@ -1,10 +1,6 @@
 import PostModel from "../models/postModel.js";
 
-const catchAsync = (fn) => {
-  return (req, res, next) => {
-    fn(req, res, next).catch(next);
-  };
-};
+import { catchAsync } from "../utils/catchAsync.js";
 
 export const getAllPosts = catchAsync(async (req, res, next) => {
   const posts = await PostModel.find();

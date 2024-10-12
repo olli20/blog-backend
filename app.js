@@ -5,6 +5,7 @@ import cors from "cors";
 import "dotenv/config";
 
 import blogRouter from "./routes/blogRoutes.js";
+import tagsRouter from './routes/tagsRoutes.js';
 import globalErrorHandler from './controllers/errorController.js';
 
 const app = express();
@@ -25,6 +26,8 @@ app.use(express.static("public"));
 
 //ROUTES
 app.use("/api/blog", blogRouter);
+app.use("/api/tags", tagsRouter);
+
 
 // handle not found error
 app.all("*", (req, res) => {
