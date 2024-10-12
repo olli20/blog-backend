@@ -12,14 +12,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_HOST = process.env.DB_HOST;
 
-app.use(morgan("tiny"));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+  console.log('Morgan enabled for development');
+}
+
+// app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
 
 //ROUTES
-app.use("/blog", blogRouter);
+app.use("/api/blog", blogRouter);
 
 // handle not found error
 app.all("*", (req, res) => {
@@ -34,6 +39,7 @@ mongoose
   .connect(DB_HOST)
   .then(() => {
     app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
       console.log("Database connection successful");
     });
 })
