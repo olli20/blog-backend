@@ -28,7 +28,6 @@ export const getAllPosts = catchAsync(async (req, res, next) => {
   });
 });
 
-
 export const getPostById = catchAsync(async (req, res, next) => {
   const post = await PostModel.findById(req.params.id);
 
