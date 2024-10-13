@@ -13,8 +13,12 @@ const postModel = new Schema({
     type: [String], 
     default: [],
   },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
-  
+
 const PostModel = model("post", postModel);
-  
+
 export default PostModel;
