@@ -1,12 +1,26 @@
 import PostModel from "../models/postModel.js";
-
 import { catchAsync } from "../utils/catchAsync.js";
 
 export const getAllPosts = catchAsync(async (req, res, next) => {
-  const posts = await PostModel.find();
+  const page = parseInt(req.query.page) || 1; 
+  const limit = parseInt(req.query.limit) || 7; 
+  const skip = (page - 1) * limit; 
+
+  const totalPosts = await PostModel.countDocuments();
+
+  const posts = await PostModel.find().skip(skip).limit(limit).lean();
+
+  const totalPages = Math.ceil(totalPosts / limit);
+
+  const hasNextPage = page < totalPages;
+
   res.status(200).json({
     status: 'success',
     results: posts.length,
+    totalPosts,
+    currentPage: page,
+    totalPages,
+    hasNextPage,
     data: {
       posts,
     },
