@@ -15,7 +15,6 @@ const DB_HOST = process.env.DB_HOST;
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-  console.log('Morgan enabled for development');
 }
 
 // app.use(morgan("tiny"));
@@ -23,11 +22,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-
 //ROUTES
 app.use("/api/blog", blogRouter);
 app.use("/api/tags", tagsRouter);
-
 
 // handle not found error
 app.all("*", (req, res) => {
@@ -38,7 +35,6 @@ app.all("*", (req, res) => {
 app.use(globalErrorHandler);
 
 if (!DB_HOST) {
-  console.error('Error: DB_HOST environment variable is not set.');
   process.exit(1);
 }
 

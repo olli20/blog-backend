@@ -17,6 +17,16 @@ const postModel = new Schema({
     type: Date,
     default: Date.now,
   },
+  previousPostId: {
+    type: Schema.Types.ObjectId,
+    ref: 'post',
+    default: null,
+  },
+  nextPostId: {
+    type: Schema.Types.ObjectId,
+    ref: 'post',
+    default: null,
+  }
 });
 
 const PostModel = model("post", postModel);
