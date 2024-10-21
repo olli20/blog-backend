@@ -1,32 +1,31 @@
 import PostModel from "../models/postModel.js";
-import TagModel from "../models/tagModel.js";
+import TagsModel from "../models/tagsModel.js";
 import { catchAsync } from "../utils/catchAsync.js";
+import mongoose from 'mongoose';
 
 export const getAllPosts = catchAsync(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 7;
   const skip = (page - 1) * limit;
-  const tag = req.query.tag;  // Tag ID or tag name
+  const tag = req.query.tag;  
 
   let query = {};
 
   if (tag) {
-    const foundTag = await TagModel.findOne({ $or: [{ _id: tag }, { tagName: tag }] });
-
-    if (foundTag) {
-      query.tags = foundTag._id;  
-    } else {
-      return res.status(404).json({
+    if (!mongoose.Types.ObjectId.isValid(tag)) {
+      return res.status(400).json({
         status: 'fail',
-        message: 'Tag not found',
+        message: 'Invalid tag ID',
       });
     }
+
+    query.tags = tag;
   }
 
   const posts = await PostModel.find(query)
     .skip(skip)
     .limit(limit)
-    .populate('tags', 'tagName')
+    .populate('tags', 'tagName')  // populate tag names 
     .lean();
 
   const totalPosts = await PostModel.countDocuments(query);
@@ -46,16 +45,71 @@ export const getAllPosts = catchAsync(async (req, res, next) => {
 });
 
 export const getPostById = catchAsync(async (req, res, next) => {
-  const post = await PostModel.findById(req.params.id).populate('tags', 'tagName');  
+  const postId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Invalid post ID',
+    });
+  }
+
+  const post = await PostModel.findById(postId).populate('tags', 'tagName');
 
   if (!post) {
-    return next(new Error('Post not found'));
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Post not found',
+    });
   }
 
   res.status(200).json({
     status: 'success',
     data: {
       post,
+    },
+  });
+});
+
+export const createPost = catchAsync(async (req, res, next) => {
+  const { title, content, tags } = req.body;
+
+  if (!title || !content) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Title and content are required',
+    });
+  }
+
+  if (tags && tags.length > 0) {
+    const invalidTags = tags.filter(tag => !mongoose.Types.ObjectId.isValid(tag));
+    if (invalidTags.length > 0) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'One or more tag IDs are invalid',
+      });
+    }
+
+    const validTags = await TagsModel.find({ _id: { $in: tags } });
+
+    if (validTags.length !== tags.length) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Some tags are not found in the database',
+      });
+    }
+  }
+
+  const newPost = await PostModel.create({
+    title,
+    content,
+    tags,
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      post: newPost,
     },
   });
 });

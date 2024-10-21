@@ -8,6 +8,6 @@ const tagSchema = new Schema({
   },
 }, { versionKey: false });
 
-const TagModel = model("tags", tagSchema);
+const TagsModel = model("tags", tagSchema);
 
-export default TagModel;
+export default TagsModel;
