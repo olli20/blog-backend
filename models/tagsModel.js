@@ -1,12 +1,13 @@
 import { Schema, model } from "mongoose";
 
-const tagsModel = new Schema({
-    allTags: {
-    type: [String], 
-    default: [],
+const tagSchema = new Schema({
+  tagName: {
+    type: String,
+    required: true,
+    unique: true, 
   },
-});
-  
-const TagsModel = model("tags", tagsModel);
-  
+}, { versionKey: false });
+
+const TagsModel = model("tags", tagSchema);
+
 export default TagsModel;

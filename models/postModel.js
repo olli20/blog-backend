@@ -9,23 +9,15 @@ const postModel = new Schema({
     type: String,
     required: true,
   },
-  tags: {
-    type: [String], 
-    default: [],
-  },
+  tags: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'tags',
+    },
+  ],
   date: {
     type: Date,
     default: Date.now,
-  },
-  previousPostId: {
-    type: Schema.Types.ObjectId,
-    ref: 'post',
-    default: null,
-  },
-  nextPostId: {
-    type: Schema.Types.ObjectId,
-    ref: 'post',
-    default: null,
   }
 });
 
