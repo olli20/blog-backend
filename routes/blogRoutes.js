@@ -5,6 +5,6 @@ const blogRouter = express.Router();
 
 blogRouter.route("/").get(getAllPosts).post(createPost);
 
-blogRouter.route("/:id").post(getPostById);
+blogRouter.route("/:id").get(getPostById);
 
 export default blogRouter;

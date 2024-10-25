@@ -7,29 +7,33 @@ export const getAllPosts = catchAsync(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 7;
   const skip = (page - 1) * limit;
-  const tag = req.query.tag;  
+  const tag = req.query.tag;
+
+  console.log("Received query parameters:", { page, limit, tag });
 
   let query = {};
 
   if (tag) {
     if (!mongoose.Types.ObjectId.isValid(tag)) {
+      console.error("Invalid tag ID:", tag);
       return res.status(400).json({
         status: 'fail',
         message: 'Invalid tag ID',
       });
     }
-
     query.tags = tag;
   }
 
   const posts = await PostModel.find(query)
     .skip(skip)
     .limit(limit)
-    .populate('tags', 'tagName')  // populate tag names 
+    .populate('tags', 'tagName')
     .lean();
 
   const totalPosts = await PostModel.countDocuments(query);
   const totalPages = Math.ceil(totalPosts / limit);
+
+  console.log("Posts fetched back:", posts);
 
   res.status(200).json({
     status: 'success',
@@ -46,6 +50,7 @@ export const getAllPosts = catchAsync(async (req, res, next) => {
 
 export const getPostById = catchAsync(async (req, res, next) => {
   const postId = req.params.id;
+  console.log(postId);
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return res.status(400).json({
@@ -56,6 +61,7 @@ export const getPostById = catchAsync(async (req, res, next) => {
 
   const post = await PostModel.findById(postId).populate('tags', 'tagName');
 
+  
   if (!post) {
     return res.status(404).json({
       status: 'fail',
