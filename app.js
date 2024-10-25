@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 //ROUTES
-app.use("/api/blog", blogRouter);
+app.use("/api/posts", blogRouter);
 app.use("/api/tags", tagsRouter);
 
 // handle not found error
