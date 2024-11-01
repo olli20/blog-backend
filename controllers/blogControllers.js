@@ -61,7 +61,6 @@ export const getPostById = catchAsync(async (req, res, next) => {
 
   const post = await PostModel.findById(postId).populate('tags', 'tagName');
 
-  
   if (!post) {
     return res.status(404).json({
       status: 'fail',
@@ -78,7 +77,7 @@ export const getPostById = catchAsync(async (req, res, next) => {
 });
 
 export const createPost = catchAsync(async (req, res, next) => {
-  const { title, content, tags } = req.body;
+  const { title, content, imageMetadata = [] } = req.body;
 
   if (!title || !content) {
     return res.status(400).json({
@@ -87,29 +86,39 @@ export const createPost = catchAsync(async (req, res, next) => {
     });
   }
 
+  let tags = req.body.tags;
+
+  if (typeof tags === 'string') {
+    tags = tags.includes(',') ? tags.split(',') : [tags];
+  }
+
+  tags = tags.map(tag => new mongoose.Types.ObjectId(String(tag)));
+
   if (tags && tags.length > 0) {
-    const invalidTags = tags.filter(tag => !mongoose.Types.ObjectId.isValid(tag));
+    const existingTags = await TagsModel.find({ _id: { $in: tags } });
+    const existingTagIds = existingTags.map(tag => tag._id.toString());
+
+    const invalidTags = tags.filter(tag => !existingTagIds.includes(tag.toString()));
+
     if (invalidTags.length > 0) {
       return res.status(400).json({
         status: 'fail',
-        message: 'One or more tag IDs are invalid',
-      });
-    }
-
-    const validTags = await TagsModel.find({ _id: { $in: tags } });
-
-    if (validTags.length !== tags.length) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Some tags are not found in the database',
+        message: 'One or more selected tags do not exist',
       });
     }
   }
+
+  const gallery = req.files.map((file, index) => ({
+    source: file.path, 
+    title: imageMetadata[index]?.title || title,
+    alt: imageMetadata[index]?.alt || `Image of ${title}`,
+  }));
 
   const newPost = await PostModel.create({
     title,
     content,
     tags,
+    gallery,
   });
 
   res.status(201).json({
